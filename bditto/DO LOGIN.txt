@@ -1,0 +1,15 @@
+registry.digitalocean.com/bditto-cr
+
+
+
+
+
+
+
+docker login -u cicd -p d09147fd840494745b33d653914acedf6bb98bfe36de00cc8b317ea16088504b registry.digitalocean.com/bditto-cr
+
+
+
+
+token name :- cicd
+token id :--   d09147fd840494745b33d653914acedf6bb98bfe36de00cc8b317ea16088504b

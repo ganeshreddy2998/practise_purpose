@@ -1,0 +1,36 @@
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04      =====  docker documentation 
+https://docs.docker.com/language/python/build-images/                                             =======  Dockerfile_for_python_image
+https://semaphoreci.com/community/tutorials/dockerizing-a-python-django-web-application               ===  dockerize application
+https://github.com/ValaxyTech/DevOpsDemos  							      ===  installation of devops tools
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+========================================
+drwxr-xr-x  2 root root 4096 Apr  4 09:13 ./
+drwx------ 14 root root 4096 Apr  4 09:13 ../
+-rw-r--r--  1 root root  931 Mar 31 14:46 bdittodaphnedeployment.yaml
+-rw-r--r--  1 root root  947 Mar 31 14:46 bdittogunicorndeployment.yaml
+-rw-r--r--  1 root root  925 Mar 24 16:07 bdittohttpdeployment.yaml
+-rw-r--r--  1 root root  924 Mar 29 15:38 bdittonodedeployment.yaml
+-rw-r--r--  1 root root  753 Apr  2 04:29 hello-kubernetes-ingress.yaml
+-rw-r--r--  1 root root  186 Apr  1 10:13 postgres-configmap.yaml
+-rw-r--r--  1 root root  475 Apr  1 10:12 postgres-storage.yaml
+-rw-r--r--  1 root root  841 Apr  1 10:45 postgresqldeployment.yaml
+-rw-r--r--  1 root root  497 Apr  1 03:18 production_issuer.yaml
+:wq!

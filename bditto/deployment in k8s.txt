@@ -1,0 +1,100 @@
+==============================================================
+node_deployment
+=================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittonodedeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittonodedeployment
+  template:
+    metadata:
+      labels:
+        app: bdittonodedeployment
+    spec:
+      containers:
+        - name: bdittonode
+          image: 'registry.digitalocean.com/bditto-cr/nodebackend:latest'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittonodeservice
+  labels:
+    name: bdittonodeservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 3000
+     protocol: TCP
+  selector:
+    app: bdittonodedeployment
+  type: LoadBalancer
+==============================================================================
+https deployment
+===============================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittohttpdeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittohttpdeployment
+  template:
+    metadata:
+      labels:
+        app: bdittohttpdeployment
+    spec:
+      containers:
+        - name: bdittohttp
+          image: 'registry.digitalocean.com/bditto-cr/bdittodjango:latest'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittohttpservice
+  labels:
+    name: bdittohttpservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 8000
+     protocol: TCP
+  selector:
+    app: bdittohttpdeployment
+  type: LoadBalancer
+=============================================================
+=================================================================

@@ -1,0 +1,625 @@
+
+bdittodaphnedeployment.yaml
+=========================================================================================================
+
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittodaphnedeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittodaphnedeployment
+  template:
+    metadata:
+      labels:
+        app: bdittodaphnedeployment
+    spec:
+      containers:
+        - name: bdittodaphne
+          image: 'registry.digitalocean.com/bditto-cr/daphne:dev2'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 8002
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittodaphneservice
+  labels:
+    name: bdittodaphneservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 8002
+     protocol: TCP
+  selector:
+    app: bdittodaphnedeployment
+  type: LoadBalancer
+===============================================================================
+bdittohttpdeployment.yaml
+========================================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittohttpdeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittohttpdeployment
+  template:
+    metadata:
+      labels:
+        app: bdittohttpdeployment
+    spec:
+      containers:
+        - name: bdittohttp
+          image: 'registry.digitalocean.com/bditto-cr/bdittodjango:latest'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittohttpservice
+  labels:
+    name: bdittohttpservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 8000
+     protocol: TCP
+  selector:
+    app: bdittohttpdeployment
+  type: LoadBalancer
+==================================================================================================
+mongo-storage.yaml
+=============================================================================
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongo-pv-volume
+  labels:
+    type: local
+    app: mongo
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data2"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mongo-pv-claim
+  labels:
+    app: mongo
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+=================================================================================
+postgres-storage.yaml
+========================================================================
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv-volume
+  labels:
+    type: local
+    app: postgres
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+=====================================================================================
+redisprimarydeployemnt.yaml
+======================================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primary-deployment
+  labels:
+    name: redis-primary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: redis-primary
+  template:
+    metadata:
+      labels:
+        name: redis-primary
+    spec:
+      subdomain: primary
+      containers:
+      - name: redis
+        image: redis:5.0.7-alpine
+        command:
+          - "redis-server"
+        args:
+          - "--protected-mode"
+          - "no"
+        ports:
+        - containerPort: 6379
+======================================================================================
+redisreplicaservice.yaml
+======================================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: replica
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    name: redis-replica
+====================================================================================
+bdittofrontenddeployment.yaml
+====================================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittofrontenddeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittofrontenddeployment
+  template:
+    metadata:
+      labels:
+        app: bdittofrontenddeployment
+    spec:
+      containers:
+        - name: bdittofrontend
+          image: 'registry.digitalocean.com/bditto-cr/frontend:db740c04'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittofrontendservice
+  labels:
+    name: bdittofrontendservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 80
+     protocol: TCP
+  selector:
+    app: bdittofrontenddeployment
+  type: LoadBalancer
+======================================================================================================
+bdittonodedeployment.yaml
+=====================================================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittonodedeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittonodedeployment
+  template:
+    metadata:
+      labels:
+        app: bdittonodedeployment
+    spec:
+      containers:
+        - name: bdittonode
+          image: 'registry.digitalocean.com/bditto-cr/nodebackend:latest'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittonodeservice
+  labels:
+    name: bdittonodeservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 3000
+     protocol: TCP
+  selector:
+    app: bdittonodedeployment
+  type: LoadBalancer
+=========================================================================================================================
+mongodeployment.yaml
+===========================================================================================================================
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    name: mongo
+#  name: mongo
+#spec:
+#  ports:
+#    - port: 27017
+#      targetPort: 27017
+#  selector:
+#    name: mongo
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  type: LoadBalancer
+#  ports:
+#   - port: 5432
+  ports:
+   - port: 80
+     targetPort: 27017
+     protocol: TCP
+  selector:
+   app: mongo
+
+---
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    name: mongo
+  name: mongo-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mongo
+    spec:
+      containers:
+      - image: mongo
+        name: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+          hostPort: 27017
+        volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongo-pv-claim
+====================================================================================================
+postgresqldeployment.yaml
+=====================================================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: LoadBalancer
+#  ports:
+#   - port: 5432
+  ports:
+   - port: 80
+     targetPort: 5432
+     protocol: TCP
+  selector:
+   app: postgres
+====================================================================================
+redisprimaryservice.yaml
+================================================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: primary
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    name: redis-primary
+===========================================================================================
+bdittogunicorndeployamnet.yaml
+==========================================================================================
+#apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittogunicorndeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittogunicorndeployment
+  template:
+    metadata:
+      labels:
+        app: bdittogunicorndeployment
+    spec:
+      containers:
+        - name: bdittogunicorn
+          image: 'registry.digitalocean.com/bditto-cr/gunicorn:dev2'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 8003
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittogunicornservice
+  labels:
+    name: bdittogunicornservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 8003
+     protocol: TCP
+  selector:
+    app: bdittogunicorndeployment
+  type: LoadBalancer
+====================================================================================================
+hello-kubernetes-ingress.yaml
+===================================================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-kubernetes-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - http.dev.bditto.com
+    - async.dev.bditto.com
+    - node.dev.bditto.com
+    - postgres.dev.bditto.com
+    - frontend.dev.bditto.com
+    secretName: hello-kubernetes-tls
+  rules:
+  - host: "async.dev.bditto.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bdittodaphneservice
+            port:
+              number: 80
+  - host: "http.dev.bditto.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bdittogunicornservice
+            port:
+              number: 80
+  - host: "node.dev.bditto.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bdittonodeservice
+            port:
+              number: 80
+  - host: "postgres.dev.bditto.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: postgres
+            port:
+              number: 80
+  - host: "frontend.dev.bditto.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bdittofrontendservice
+            port:
+              number: 80
+=================================================================================================
+postgres-configmap.yaml
+=============================================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: postgresdb
+  POSTGRES_USER: postgresadmin
+  POSTGRES_PASSWORD: admin123
+==========================================================================================================
+production-issuer.yaml
+=============================================================================================
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Email address used for ACME registration
+    email: rhlbatra1931@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Name of a secret used to store the ACME account private key
+      name: letsencrypt-prod-private-key
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+======================================================================================================================
+redisreplicadeployment.yaml
+==========================================================================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: replica-deployment
+  labels:
+    name: redis-replica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: redis-replica
+  template:
+    metadata:
+      labels:
+        name: redis-replica
+    spec:
+      subdomain: replica
+      containers:
+      - name: redis
+        image: redis:5.0.7-alpine
+        command:
+          - "redis-server"
+        args:
+          - "--slaveof"
+          - "primary.default.svc.cluster.local"
+          - "6379"
+          - "--protected-mode"
+          - "no"
+        ports:
+        - containerPort: 6379
+=============================================================================
+

@@ -1,0 +1,141 @@
+1. create a kubernetes cluster
+2. create a digital ocean droplet and install required softwares on droplet like docker,dockercompose,kubectl,doctl,git  
+   
+
+  *
+    for running kubectl command in droplet, install kubectl in droplet and download the config file for kubernetes from cluseter and copy in .kube/config file in droplet after the we will be able to run kubectl command from droplet
+    like 
+    kubectl get nodes
+
+  * 
+   for installing doctl
+   https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/
+   cd ~
+   wget https://github.com/digitalocean/doctl/releases/download/v1.58.0/doctl-1.58.0-linux-amd64.tar.gz    
+   tar xf ~/doctl-1.58.0-linux-amd64.tar.gz
+   sudo mv ~/doctl /usr/local/bin  
+  
+   Step 2: Create an API token
+   https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/
+   Create a DigitalOcean API token for your account with read and write access from the Applications & API page in the control panel. The token string is only displayed once, so save it in a safe place
+
+   after authenticating with doctl we will able to run command in digital ocean and we can push the docker images in container registry in digital ocean
+
+  * 
+   Push to Your Registry
+   To push a Docker image to your registry:
+
+   Install doctl and authenticate it with an API token.
+
+   Use the registry login command to authenticate Docker with your registry:
+
+   doctl registry login
+  
+   Use the docker tag command to tag your image with the fully qualified destination path:
+
+   docker tag <my-image> registry.digitalocean.com/<my-registry>/<my-image>
+  
+   Use the docker push command to upload your image:
+
+   docker push registry.digitalocean.com/<my-registry>/<my-image>
+
+3. clone the dev branch from
+   https://gitlab.com/thriftysofts/bditto.git for daphne and gunicorn
+   add the Dockerfile and start.sh file in root 
+   
+   and run the command 
+   docker build -t gunicorn .
+   for running in droplet  we can run docker run -p 8003:8003 gunicorn:latest
+
+   for daphne
+   
+   docker build -t daphne .
+   for running in droplet  we can run docker run -p 8003:8003 daphne:latest
+   
+    
+   if all is working fine then
+   
+   doctl registry login
+   docker tag gunicorn:latest registry.digitalocean.com/bditto-cr/gunicorn:dev
+   docker push registry.digitalocean.com/bditto-cr/gunicorn:dev
+
+    
+   doctl registry login
+   docker tag daphne:latest registry.digitalocean.com/bditto-cr/daphne:dev
+   docker push registry.digitalocean.com/bditto-cr/daphne:dev
+
+4. once the docker images pushed in container registry we can use these images in kubernetes
+
+
+5. create yaml file for gunicorn and daphne  
+   name bdittogunicorndeployment.yaml
+   
+  
+   apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdittogunicorndeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdittogunicorndeployment
+  template:
+    metadata:
+      labels:
+        app: bdittogunicorndeployment
+    spec:
+      containers:
+        - name: bdittogunicorn
+          image: 'registry.digitalocean.com/bditto-cr/gunicorn:dev'
+          imagePullPolicy: Always
+          #image: 'docker.io/tutum/hello-world'
+          ports:
+            - containerPort: 8003
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bdittogunicornservice
+  labels:
+    name: bdittogunicornservice
+spec:
+  #selector:
+  #  app: bditto_http_deployment
+  #type: NodePort
+  #ports:
+  # - protocol: TCP
+   #  port: 8000
+   #  targetPort: 8000
+   #  nodePort: 30521
+  ports:
+   - port: 80
+     targetPort: 8003
+     protocol: TCP
+  selector:
+    app: bdittogunicorndeployment
+  type: LoadBalancer
+
+
+for implement this in kubernetes we can run the command 
+kubectl apply -f bdittogunicorndeployment.yaml --namespace biditto-dev
+
+after that service,deployment and pod will be created
+we can access the service with load balancer ip
+
+6 same process as step 5 we can follow for daphne
+
+
+
+
+
+
+
+   
+
+
+   
+   
+   
+

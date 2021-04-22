@@ -1,0 +1,37 @@
+brew install kubernetes-helm
+========================
+helm version
+========================
+kubectl get storageclass
+===========================
+mkdir ~/mongo-rs
+cd ~/mongo-rs
+==========================
+git clone https://github.com/kubernetes/charts.git
+=====================================================
+Navigate to the MongoDB ReplicaSet directory (charts/stable/mongodb-replicaset/) and verify that the file values.yaml exists.
+
+cd charts/stable/mongodb-replicaset/
+ls values.yaml
+
+====================================================
+nano values.yaml
+=============================================
+cd ~/mongo-rs
+-===============
+helm install --name=todo -f charts/stable/mongodb-replicaset/values.yaml stable/mongodb-replicaset
+========================================================
+kubectl get statefulset
+===================================
+kubectl get pods
+======================================
+Use kubectl to launch the mongo console on one of the hosts:
+
+kubectl exec -it todo-mongodb-replicaset-0 mongo
+================================
+Check the ReplicaSet’s configuration with the following command:
+
+rs.conf()
+==================================================
+exit 
+=====================

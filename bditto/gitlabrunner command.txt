@@ -1,0 +1,1 @@
+ gitlab-runner register -n --url https://gitlab.com/ --registration-token "3_3KA6VECDFSaNCVG8jc" --docker-image "docker:stable" --executor docker --description "myrunner" --docker-volumes /var/run/docker.sock:/var/run/docker.sock

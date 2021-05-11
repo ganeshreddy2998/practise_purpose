@@ -1,0 +1,15 @@
+deployment.apps/bdittogunicorndeployment image updated
+Cleaning up file based variables
+00:02
+Job succeeded
+
+
+
+
+=============================================================================
+
+
+
+Error from server (NotFound): deployments.apps "bditto-gunicorn-api" not found
+Cleaning up file based variables
+ERROR: Job failed: exit code 1
